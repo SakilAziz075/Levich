@@ -17,10 +17,13 @@ class AuctionRepository {
   }
 
   bulkInsert(items) {
-    items.forEach(item => {
-      this.items.set(item.id, item);
-    });
+    items.forEach(item => this.items.set(item.id, item));
   }
 }
 
-module.exports = new AuctionRepository();
+// GLOBAL SINGLETON
+if (!global.__auctionRepository) {
+  global.__auctionRepository = new AuctionRepository();
+}
+
+module.exports = global.__auctionRepository;

@@ -9,3 +9,14 @@ exports.createSession = (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.getUser = (req, res) => {
+  const user = require("../../modules/users/user.service")
+    .getUser(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  res.json(user);
+};
