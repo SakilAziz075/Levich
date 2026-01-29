@@ -4,8 +4,18 @@ const {
   AuctionEndedError,
   OutbidError
 } = require("./auction.errors");
+
 const { validateBidAmount } = require("./auction.validator");
 const userService = require("../users/user.service");
+
+
+/**
+ * AuctionService
+ * --------------
+ * Contains all business logic related to auctions.
+ * Concurrency-sensitive operations (bidding) are handled
+ * inside atomic critical sections protected by mutex locks.
+ */
 
 class AuctionService {
 
@@ -13,9 +23,32 @@ class AuctionService {
     return auctionRepository.getAll();
   }
 
+  /**
+   * Atomically places a bid on an auction item.
+   *
+   * Concurrency Guarantee:
+   * ---------------------
+   * The sequence:
+   *   read item -> validate -> update -> persist
+   * is executed inside a per-item mutex lock.
+   *
+   * If two users submit the same bid at the same millisecond:
+   * - First caller acquires the lock and succeeds
+   * - Second caller waits, then observes updated price and fails
+   *
+   * This prevents race conditions and ensures consistency.
+   *
+   * @param {string} itemId
+   * @param {number} amount
+   * @param {string} userId
+   * @returns updated auction item
+   */
+
+
   async placeBid(itemId, amount, userId) {
     validateBidAmount(amount);
 
+    // -------- ENTER CRITICAL SECTION ----------
     await mutex.acquire(itemId);
 
     try {
@@ -57,6 +90,7 @@ class AuctionService {
     } finally {
       mutex.release(itemId);
     }
+    // -------- EXIT CRITICAL SECTION ----------
   }
 }
 

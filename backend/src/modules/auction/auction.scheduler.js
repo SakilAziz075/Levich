@@ -40,10 +40,10 @@ function startAuctionScheduler(io) {
       i => Date.now() >= i.endTime
     );
 
-    // Remove expired
+    // Removes expired items
     expired.forEach(i => auctionRepository.delete(i.id));
 
-    // Replace expired with new auctions
+    // Replaces expired with new auctions
     const toCreate = expired.length;
 
     for (let i = 0; i < toCreate; i++) {

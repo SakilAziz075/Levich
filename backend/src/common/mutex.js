@@ -1,7 +1,22 @@
-// One active modifier per item
-// Deterministic ordering
-// Simple and effective
-
+/*
+ * Lightweight in-memory mutex for per-resource locking.
+ *
+ * ----
+ * Prevents race conditions when multiple async operations
+ * attempt to modify the same logical resource (auction item).
+ *
+ * How it will work:
+ * ----
+ * - Each resource is identified by a unique key (itemId)
+ * - Only one execution path may hold a lock for a key at a time
+ * - Others spin briefly until lock is released
+ *
+ * NOTE:
+ * This approach will sufficient for a single Node.js instance.
+ * In horizontally scaled environments, replace with Redis-based
+ * distributed locks or DB transactions but since Render donot provide free DB
+ * we are using this approach.
+ */
 
 class Mutex {
   constructor() {
