@@ -11,15 +11,15 @@ const TITLES = [
   "Nintendo Switch"
 ];
 
-function createNewAuction() {
+function createAuction() {
   const title = TITLES[Math.floor(Math.random() * TITLES.length)];
-  const startPrice = Math.floor(300 + Math.random() * 400);
+  const price = Math.floor(300 + Math.random() * 400);
 
   return {
     id: uuid(),
     title,
-    startingPrice: startPrice,
-    currentBid: startPrice,
+    startingPrice: price,
+    currentBid: price,
     highestBidder: null,
     bidHistory: [],
     endTime: Date.now() + 5 * 60 * 1000,
@@ -29,15 +29,29 @@ function createNewAuction() {
 
 function startAuctionScheduler(io) {
   setInterval(() => {
+
     const items = auctionRepository.getAll();
 
-    items.forEach(item => {
-      if (Date.now() > item.endTime) {
-        const newItem = createNewAuction();
-        auctionRepository.save(newItem);
-        io.emit("NEW_AUCTION", newItem);
-      }
-    });
+    const active = items.filter(
+      i => Date.now() < i.endTime
+    );
+
+    const expired = items.filter(
+      i => Date.now() >= i.endTime
+    );
+
+    // Remove expired
+    expired.forEach(i => auctionRepository.delete(i.id));
+
+    // Replace expired with new auctions
+    const toCreate = expired.length;
+
+    for (let i = 0; i < toCreate; i++) {
+      const newItem = createAuction();
+      auctionRepository.save(newItem);
+      io.emit("NEW_AUCTION", newItem);
+    }
+
   }, 2000);
 }
 

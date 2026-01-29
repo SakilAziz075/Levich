@@ -19,6 +19,11 @@ class AuctionRepository {
   bulkInsert(items) {
     items.forEach(item => this.items.set(item.id, item));
   }
+
+  delete(id) {
+  this.items.delete(id);
+}
+
 }
 
 // GLOBAL SINGLETON

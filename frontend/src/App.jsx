@@ -3,7 +3,12 @@ import Dashboard from "../pages/Dashboard";
 import { useUser } from "../hooks/useUser";
 
 function App() {
-  const { user, login } = useUser();
+  const { user, login, logout } = useUser();
+
+  function handleLogout() {
+    logout();
+    window.location.reload();
+  }
 
   if (!user) {
     return (
@@ -15,7 +20,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <Dashboard user={user} />
+      <Dashboard user={user} onLogout={handleLogout} />
     </div>
   );
 }

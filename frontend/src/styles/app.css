@@ -97,3 +97,11 @@ button:disabled {
   font-weight: 600;
   margin-top: 20px;
 }
+
+.top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
